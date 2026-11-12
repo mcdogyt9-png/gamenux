@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Initialize a Wine prefix with DXVK + common winetricks
+set -euo pipefail
+export WINEPREFIX="${WINEPREFIX:-$HOME/.wine}"
+export WINEARCH="${WINEARCH:-win64}"
+
+echo "Creating prefix: $WINEPREFIX"
+wineboot --init
+
+echo "Installing DXVK..."
+winetricks -q dxvk
+
+echo "Installing common fonts..."
+winetricks -q corefonts
+
+echo "Done. Prefix ready at $WINEPREFIX"

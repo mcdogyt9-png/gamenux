@@ -1,0 +1,9 @@
+services:
+  builder:
+    build: .
+    privileged: true
+    volumes:
+      - .:/src
+      - ./build:/out
+    environment:
+      EDITION: standard

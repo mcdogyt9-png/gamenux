@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=Gamenux Welcome
+Exec=/usr/local/bin/gamenux-welcome
+Icon=gamenux
+X-GNOME-Autostart-enabled=true
+Hidden=false
+NoDisplay=false

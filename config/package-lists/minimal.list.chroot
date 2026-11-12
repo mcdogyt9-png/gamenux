@@ -1,0 +1,22 @@
+# Gamenux minimal edition (headless gaming host)
+live-boot
+live-config
+live-config-systemd
+systemd
+systemd-sysv
+sudo
+locales
+linux-image-amd64
+firmware-linux
+firmware-linux-nonfree
+network-manager
+openssh-server
+wine
+wine64
+winetricks
+steamcmd
+docker.io
+git
+curl
+wget
+htop

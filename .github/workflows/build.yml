@@ -1,0 +1,30 @@
+name: Build Gamenux ISO
+
+on:
+  workflow_dispatch:
+    inputs:
+      edition:
+        description: Edition to build
+        required: true
+        default: standard
+        type: choice
+        options: [standard, nvidia, minimal]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install live-build
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y live-build debootstrap squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin
+      - name: Build ISO
+        run: sudo ./build.sh ${{ github.event.inputs.edition || 'standard' }}
+      - name: Upload ISO
+        uses: actions/upload-artifact@v4
+        with:
+          name: gamenux-iso
+          path: build/*.iso

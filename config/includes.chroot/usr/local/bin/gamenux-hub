@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+# Gamenux Hub - control center for gaming/power/fan/fps settings
+set -u
+
+have() { command -v "$1" >/dev/null 2>&1; }
+
+msg() { kdialog --msgbox "$1" 2>/dev/null || echo "$1"; }
+err() { kdialog --error "$1" 2>/dev/null || echo "$1" >&2; }
+
+main_menu() {
+  kdialog --title "Gamenux Hub" --menu "Choose a category:" \
+    power "Power & CPU governor" \
+    fans "Fan control" \
+    fps "FPS overlay (MangoHud)" \
+    gpu "GPU tools (CoreCtrl/NVIDIA)" \
+    launch "Launch games/apps" \
+    install "Install extras (Discord)" \
+    info "System info" \
+    quit "Exit" 2>/dev/null
+}
+
+power_menu() {
+  local c
+  c=$(kdialog --title "Power" --menu "CPU governor:" \
+    performance "Max performance" \
+    powersave "Power saving" \
+    schedutil "Schedutil (default)" \
+    show "Show current" 2>/dev/null) || return
+  case "$c" in
+    performance|powersave|schedutil)
+      if have cpupower; then sudo cpupower frequency-set -g "$c" && msg "Governor set to $c"; else err "cpupower not installed"; fi ;;
+    show)
+      if have cpupower; then msg "$(cpupower frequency-info | grep -i 'governor' | head)"; else err "cpupower not installed"; fi ;;
+  esac
+}
+
+nvidia_power_limit() {
+  if ! have nvidia-smi; then err "nvidia-smi not found (NVIDIA edition?)"; return; fi
+  local cur pl
+  cur=$(nvidia-smi --query-gpu=power.limit --format=csv,noheader 2>/dev/null | head -1)
+  pl=$(kdialog --title "NVIDIA Power Limit" --inputbox "Current limit: $cur W. Enter new limit (W):" "$cur" 2>/dev/null) || return
+  if [[ "$pl" =~ ^[0-9]+$ ]]; then
+    if sudo nvidia-smi -pl "$pl" >/dev/null 2>&1; then msg "Power limit set to ${pl}W"; else err "Failed to set power limit (try sudo)"; fi
+  else err "Invalid number"; fi
+}
+
+fans_menu() {
+  local c
+  c=$(kdialog --title "Fans" --menu "Fan control:" \
+    nvidia_auto "NVIDIA: auto fan" \
+    nvidia_manual "NVIDIA: manual fan speed" \
+    pwm "Run pwmconfig (lm-sensors)" \
+    sensors "Show sensor readings" 2>/dev/null) || return
+  case "$c" in
+    nvidia_auto)
+      if have nvidia-settings; then nvidia-settings -a "[gpu:0]/GPUFanControlState=0" >/dev/null 2>&1 && msg "Fan set to auto"; else err "nvidia-settings not found"; fi ;;
+    nvidia_manual)
+      if have nvidia-settings; then
+        local sp; sp=$(kdialog --inputbox "Fan speed (0-100):" "50" 2>/dev/null) || return
+        if [[ "$sp" =~ ^[0-9]+$ ]] && [ "$sp" -ge 0 ] && [ "$sp" -le 100 ]; then
+          nvidia-settings -a "[gpu:0]/GPUFanControlState=1" -a "[fan:0]/GPUTargetFanSpeed=$sp" >/dev/null 2>&1
+          msg "Fan speed set to ${sp}%"
+        else err "Invalid speed"; fi
+      else err "nvidia-settings not found"; fi ;;
+    pwm)
+      if have pwmconfig; then sudo pwmconfig; else err "pwmconfig not installed (lm-sensors)"; fi ;;
+    sensors)
+      if have sensors; then msg "$(sensors 2>/dev/null | head -40)"; else err "sensors not installed"; fi ;;
+  esac
+}
+
+fps_menu() {
+  local c
+  c=$(kdialog --title "FPS Overlay" --menu "MangoHud:" \
+    goverlay "Open GOverlay (configure MangoHud)" \
+    test "Test overlay (glxgears)" \
+    config "Show current config" 2>/dev/null) || return
+  case "$c" in
+    goverlay) have goverlay && goverlay || err "goverlay not installed" ;;
+    test) have mangohud && mangohud glxgears 2>/dev/null & msg "Launched glxgears with MangoHud" || err "mangohud not installed" ;;
+    config) msg "$(cat ~/.config/MangoHud/MangoHud.conf 2>/dev/null || echo 'No config')" ;;
+  esac
+}
+
+gpu_menu() {
+  local c
+  c=$(kdialog --title "GPU" --menu "GPU tools:" \
+    corectrl "Launch CoreCtrl" \
+    nvidia_power "NVIDIA power limit" \
+    nvtop "Launch nvtop monitor" \
+    vulkan "vulkaninfo" 2>/dev/null) || return
+  case "$c" in
+    corectrl) have corectrl && corectrl || err "corectrl not installed" ;;
+    nvidia_power) nvidia_power_limit ;;
+    nvtop) have nvtop && (konsole -e nvtop &) || err "nvtop not installed" ;;
+    vulkan) have vulkaninfo && msg "$(vulkaninfo --summary 2>/dev/null | head -30)" || err "vulkan-tools not installed" ;;
+  esac
+}
+
+launch_menu() {
+  local c
+  c=$(kdialog --title "Launch" --menu "Launch app:" \
+    steam "Steam" \
+    lutris "Lutris" \
+    heroic "Heroic" \
+    bottles "Bottles" \
+    obs "OBS Studio" \
+    discord "Discord" 2>/dev/null) || return
+  case "$c" in
+    steam) have steam && steam & ;;
+    lutris) have lutris && lutris & ;;
+    heroic) have heroic && heroic & ;;
+    bottles) have bottles && bottles & ;;
+    obs) have obs && obs & ;;
+    discord) have discord && discord & || (flatpak run com.discordapp.Discord &) ;;
+  esac
+}
+
+install_menu() {
+  local c
+  c=$(kdialog --title "Install extras" --menu "Install:" \
+    discord "Discord (Flatpak)" \
+    proton "Proton-GE (latest)" 2>/dev/null) || return
+  case "$c" in
+    discord)
+      if have flatpak; then
+        flatpak install -y flathub com.discordapp.Discord && msg "Discord installed"; 
+      else err "flatpak not installed"; fi ;;
+    proton) gamenux-proton-ge && msg "Proton-GE installed" ;;
+  esac
+}
+
+info_menu() {
+  if have fastfetch; then msg "$(fastfetch 2>/dev/null | head -40)"
+  elif have neofetch; then msg "$(neofetch 2>/dev/null | head -40)"
+  else msg "$(uname -a)"; fi
+}
+
+while :; do
+  choice=$(main_menu) || break
+  case "$choice" in
+    power) power_menu ;;
+    fans) fans_menu ;;
+    fps) fps_menu ;;
+    gpu) gpu_menu ;;
+    launch) launch_menu ;;
+    install) install_menu ;;
+    info) info_menu ;;
+    quit|"") break ;;
+  esac
+done

@@ -1,0 +1,105 @@
+# Gamenux standard edition package list (Debian bookworm)
+# One package per line; comments allowed.
+
+# Base system
+live-boot
+live-config
+live-config-systemd
+systemd
+systemd-sysv
+sudo
+locales
+console-setup
+keyboard-configuration
+tzdata
+
+# Kernel + firmware
+linux-image-amd64
+linux-headers-amd64
+firmware-linux
+firmware-linux-nonfree
+firmware-misc-nonfree
+firmware-realtek
+firmware-atheros
+
+# Desktop: KDE Plasma
+task-kde-desktop
+sddm
+plasma-workspace
+kwin-x11
+kwin-wayland
+dolphin
+konsole
+kate
+ark
+okular
+gwenview
+
+# Graphics
+mesa-vulkan-drivers
+libgl1-mesa-dri
+vulkan-tools
+vulkan-validationlayers
+libvulkan1
+amd64-microcode
+intel-microcode
+
+# Audio (PipeWire)
+pipewire
+pipewire-pulse
+wireplumber
+pipewire-alsa
+pipewire-jack
+
+# Networking / bluetooth
+network-manager
+network-manager-gnome
+bluez
+blueman
+
+# Gaming core
+steam
+steam-devices
+wine
+wine64
+wine32
+winetricks
+dxvk
+vkd3d
+gamemode
+mangohud
+goverlay
+lutris
+heroic
+bottles
+
+# Utilities
+flatpak
+xdg-desktop-portal
+xdg-desktop-portal-kde
+appimagelauncher
+git
+curl
+wget
+unzip
+p7zip-full
+htop
+neofetch
+fastfetch
+
+# Fonts
+fonts-noto
+fonts-noto-color-emoji
+fonts-liberation
+fonts-dejavu
+ttf-mscorefonts-installer
+# Streaming / comms
+obs-studio
+
+# Power / thermal / monitoring
+lm-sensors
+fancontrol
+linux-cpupower
+powertop
+nvtop
+corectrl

@@ -1,0 +1,9 @@
+NAME="Gamenux"
+VERSION="1.0 (bookworm)"
+ID=gamenux
+ID_LIKE=debian
+PRETTY_NAME="Gamenux 1.0"
+VERSION_ID="1.0"
+HOME_URL="https://gamenux.example"
+SUPPORT_URL="https://gamenux.example/support"
+BUG_REPORT_URL="https://gamenux.example/issues"

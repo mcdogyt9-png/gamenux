@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Gamenux first-run welcome helper
+set -euo pipefail
+if command -v kdialog >/dev/null 2>&1; then
+  kdialog --title "Welcome to Gamenux" --msgbox \
+"Welcome to Gamenux!\n\n- Steam is preinstalled.\n- Run 'gamenux-proton-ge' to install Proton-GE.\n- GameMode: gamemoderun <game>\n- MangoHud: mangohud <game>"
+fi

@@ -1,0 +1,42 @@
+#!/bin/bash
+set -e
+
+# Gamenux chroot setup hook
+
+dpkg --add-architecture i386 || true
+apt-get update
+
+echo 'gamenux ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/gamenux
+chmod 440 /etc/sudoers.d/gamenux
+
+groupadd -f steam
+groupadd -f gamemode
+
+mkdir -p /etc/skel/.config/MangoHud
+cat > /etc/skel/.config/MangoHud/MangoHud.conf <<'EOF'
+# Gamenux default MangoHud config
+fps
+frametime
+cpu_stats
+gpu_stats
+ram
+vram
+EOF
+
+flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+
+
+# Optional gaming packages (may not be in all repos)
+apt-get install -y corectrl 2>/dev/null || true
+apt-get install -y obs-studio 2>/dev/null || true
+
+# Sensors
+sensors-detect --auto 2>/dev/null || true
+
+# Discord via Flatpak (preinstall)
+if command -v flatpak >/dev/null 2>&1; then
+  flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+  flatpak install -y --noninteractive flathub com.discordapp.Discord 2>/dev/null || true
+  flatpak install -y --noninteractive flathub com.obsproject.Studio 2>/dev/null || true
+fi
+echo "Gamenux setup complete."

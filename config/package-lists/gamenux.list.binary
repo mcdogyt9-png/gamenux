@@ -1,0 +1,4 @@
+# Extra packages for the live media (binary)
+memtest86+
+grub-pc
+grub-efi-amd64
