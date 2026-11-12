@@ -15,16 +15,28 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 350
     steps:
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache 2>/dev/null || true
+          sudo docker system prune -af 2>/dev/null || true
+          df -h
+
       - uses: actions/checkout@v4
+
       - name: Install live-build
         run: |
           sudo apt-get update
           sudo apt-get install -y live-build debootstrap squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin
+
       - name: Build ISO
         run: sudo ./build.sh ${{ github.event.inputs.edition || 'standard' }}
+
       - name: Upload ISO
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: gamenux-iso
           path: build/*.iso
+          retention-days: 7
