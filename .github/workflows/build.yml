@@ -31,7 +31,7 @@ jobs:
           sudo apt-get install -y live-build debootstrap squashfs-tools xorriso grub-pc-bin grub-efi-amd64-bin
 
       - name: Build ISO
-        run: sudo ./build.sh ${{ github.event.inputs.edition || 'standard' }}
+        run: sudo bash ./build.sh ${{ github.event.inputs.edition || 'standard' }}
 
       - name: Upload ISO
         if: success()
